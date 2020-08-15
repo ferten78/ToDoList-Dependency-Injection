@@ -1,0 +1,87 @@
+﻿@model ToDoList.WebUI.Models.NewJobViewModel
+@{
+    ViewBag.Title = "Yeni Görev";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div style="padding-top:5%">
+    <h1>Yeni Görev </h1>
+    <br />
+    <hr />
+
+
+    <ul class="list-group">
+        <li class="list-group-item">
+            <div class="form-group">
+                <label for="sel1">Atanacak Kişi</label>
+                <select class="form-control" id="userId">
+
+                    @foreach (var item in Model.Users)
+                    {
+                        <option value="@item.Id">@item.UserName</option>
+                    }
+
+                </select>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="form-group">
+                <label for="sel2">Bitiş Tarihi</label>
+                <br />
+                <input size="16" type="text" id="dateForFinish" value="@DateTime.Now.Year-@DateTime.Now.Month-@DateTime.Now.Day" readonly class="form_datetime">
+
+
+            </div>
+
+        </li>
+        <li class="list-group-item">
+            <div class="form-group">
+                <label for="comment">Açıklama:</label>
+                <textarea class="form-control"  rows="5" id="description"></textarea>
+            </div>
+        </li>
+    </ul>
+
+
+
+
+</div>
+<br />
+<hr />
+<a   onclick="saveJob()" class="btn btn-success pull-right">Kaydet</a>
+
+
+<script type="text/javascript">
+    $(".form_datetime").datetimepicker({ format: 'yyyy-mm-dd hh:ii' });
+
+
+     function saveJob() {
+      
+          var data = {
+              Id: document.getElementById("userId").value,
+              date: document.getElementById("dateForFinish").value,
+              description: document.getElementById("description").value
+        };
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("addJob", "Jobs")',
+            data: data,
+            dataType: 'json',
+            success: function (result) {
+                if (result) {
+                      
+                    alert("Kayıt Başarılı");
+                    setTimeout(function () { window.location.href = "/Jobs/JobList"; }, 1500);
+                }
+                else {
+                    alert("Kayıt Başarısız");
+                }
+
+            },
+             error: function () {
+                 alert("Kayıt Başarısız");
+            }
+        });
+    }
+</script>

@@ -1,0 +1,178 @@
+﻿@model ToDoList.WebUI.Models.JobsListViewModel
+@{
+    ViewBag.Title = "Görev Listesi";
+}
+<div style="padding-top:5%">
+    <h1>Görev Listesi</h1>
+    <a href="  @Url.Action("NewJob", "Jobs")" class="btn btn-success pull-right">Görev Ekle</a>
+    <br />
+    <hr />
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Açıklama</th>
+                <th>Bitiş Tarihi</th>
+                <th>Kullanıcı</th>
+                <th>Statü</th>
+                <th>Düzenle</th>
+                <th>Sil</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Jobs)
+            {
+                <tr>
+
+                    <td>@item.description</td>
+                    <td>@item.finishDate</td>
+                    @foreach (var user in Model.Users)
+                    {
+                        if (item.userId == user.Id)
+                        {
+                            <td>@user.UserName</td>
+                        }
+                    }
+                    @foreach (var status in Model.Statuses)
+                    {
+                        if (item.statusId == status.id)
+                        {
+                            <td>@status.Description</td>
+                        }
+                    }
+
+                    <td>
+                        <a href="@Url.Action("EditJob", "Jobs", new { Id = item.id })" class="btn btn-warning">Düzenle</a>
+                    </td>
+                    <td>
+                        <button type="button" onclick="deleteJob(@item.id)" class="btn btn-danger">Sil</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+<div class="container">
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Süresi Geçen Görevler</h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Açıklama</th>
+                                <th>Bitiş Tarihi</th>
+                                <th>Kullanıcı</th>
+                                <th>Statü</th>
+                                <th>Düzenle</th>
+                                <th>Sil</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Jobs)
+                            {
+                                <tr>
+                                    @if (item.finishDate < DateTime.Now)
+                                    {
+
+                                        <td>@item.description</td>
+                                        <td>@item.finishDate</td>
+                                        foreach (var user in Model.Users)
+                                        {
+                                            if (item.userId == user.Id)
+                                            {
+                                                <td>@user.UserName</td>
+                                            }
+                                        }
+                                        foreach (var status in Model.Statuses)
+                                        {
+                                            if (item.statusId == status.id)
+                                            {
+                                                <td>@status.Description</td>
+                                            }
+                                        }
+
+                                        <td>
+                                            <a href="@Url.Action("EditJob", "Jobs", new { Id = item.id })" class="btn btn-warning">Düzenle</a>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger">Sil</button>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(window).on('load', function () {
+        var IsLate = @Html.Raw(Json.Encode(Model.IsLate));
+        console.log(IsLate);
+        if (IsLate) {
+
+            $('#myModal').modal('show');
+        }
+    });
+    function updatejob(Id) {
+
+          var data = {
+              Id: Id
+        };
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("EditJob", "Jobs")',
+            data: data,
+            dataType: 'json',
+            success: function (result) {
+
+
+            },
+             error: function () {
+            }
+        });
+    }
+
+    function deleteJob(Id) {
+
+          var data = {
+              Id: Id
+        };
+         $.ajax({
+            type: "POST",
+            url: '@Url.Action("deleteJob", "Jobs")',
+            data: data,
+            dataType: 'json',
+            success: function (result) {
+                if (result) {
+
+                    alert("Silme Başarılı");
+                    setTimeout(function () { window.location.href = "/Jobs/JobList"; }, 1500);
+                }
+                else {
+                    alert("Silme Başarısız");
+                }
+
+            },
+             error: function () {
+                 alert("Silme Başarısız");
+            }
+        });
+    }
+</script>
